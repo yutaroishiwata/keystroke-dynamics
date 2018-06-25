@@ -1,7 +1,5 @@
 $(function(){
-  //alert("test");
-  //document.write("test");
-  //console.log(event.keyCode);
+
   var typeTime;
   var diff; //値の差
   var startTime1; //基準値１
@@ -11,43 +9,25 @@ $(function(){
   var inputValue = []; //入力値
   var arrayDiff = [];
 
-  //
-  // function timeCalc(startTime, array) {
-  //   if(startTime == null){
-  //     typeTime = new Date().getTime(); //時刻値 (ミリ秒) を取得して変数に格納（基準値）
-  //     startTime = typeTime;
-  //   }else if(array.length == 0){
-  //     typeTime = new Date().getTime(); //時刻値 (ミリ秒) を取得して配列に格納
-  //     array.push(typeTime - startTime); //基準値から経過時間を引く
-  //     console.log(array);
-  //   }else {
-  //     typeTime = new Date().getTime(); //時刻値 (ミリ秒) を取得して配列に格納
-  //     array.push(typeTime - (startTime + array.reduce((a,x) => a+=x,0))); //基準値から経過時間を引く
-  //     console.log(array);
-  //   }
-  // }
-
   //.getTime() …… 1970年からの経過ミリ秒数を取得する
   document.getElementById("dataset1").addEventListener('keypress',function(){
-    //timeCalc("startTime1", "array1");
     if(startTime1 == null){
-      typeTime = new Date().getTime(); //時刻値 (ミリ秒) を取得して変数に格納（基準値）
-      startTime1 = typeTime;
+      typeTime = new Date().getTime();
+      startTime1 = typeTime; //最初のkeypressミリ秒をstartTime変数に格納
     }else if(array1.length == 0){
-      typeTime = new Date().getTime(); //時刻値 (ミリ秒) を取得して配列に格納
+      typeTime = new Date().getTime();
       array1.push(0);
-      array1.push(typeTime - startTime1); //基準値から経過時間を引く
+      array1.push(typeTime - startTime1); //2回目のkeypressミリ秒からstartTimeを引く
       console.log(array1);
     }else {
-      typeTime = new Date().getTime(); //時刻値 (ミリ秒) を取得して配列に格納
-      array1.push(typeTime - (startTime1 + array1.reduce((a,x) => a+=x,0))); //基準値から経過時間を引く
+      typeTime = new Date().getTime();
+      array1.push(typeTime - (startTime1 + array1.reduce((a,x) => a+=x,0))); //3回目以降はkeypressミリ秒からstartTime＋keyとkey間ミリ秒を引く
       console.log(array1);
     }
     inputValue.push(event.keyCode);
   });
 
   document.getElementById("dataset2").addEventListener('keypress',function(){
-    //timeCalc("startTime2", "array2");
     if(startTime2 == null){
       typeTime = new Date().getTime(); //時刻値 (ミリ秒) を取得して変数に格納（基準値）
       startTime2 = typeTime;
