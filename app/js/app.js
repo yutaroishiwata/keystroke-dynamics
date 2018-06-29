@@ -10,7 +10,7 @@ $(function(){
   var arrayDiff = [];
 
   //.getTime() …… 1970年からの経過ミリ秒数を取得する
-  document.getElementById("dataset1").addEventListener('keypress',function(){
+  document.getElementById("dataset1").addEventListener('keydown',function(event){
     if(startTime1 == null){
       typeTime = new Date().getTime();
       startTime1 = typeTime; //最初のkeypressミリ秒をstartTime変数に格納
@@ -24,10 +24,22 @@ $(function(){
       array1.push(typeTime - (startTime1 + array1.reduce((a,x) => a+=x,0))); //3回目以降はkeypressミリ秒からstartTime＋keyとkey間ミリ秒を引く
       console.log(array1);
     }
-    inputValue.push(event.keyCode);
+    
+    var keyCode = event.keyCode;//keycodeはkeypressだと取得できない
+    if(keyCode == 8){
+      console.log("Backspace");
+      $("#dataset1").val("");
+      array1.length = 0;
+      inputValue.length = 0;
+      startTime1 = null;
+      var caution = document.getElementById("caution1");
+      caution.innerHTML = "Please enter the tempo well to the end.";
+    }else {
+      inputValue.push(event.keyCode);//チャート生成用キーコード格納
+    }
   });
 
-  document.getElementById("dataset2").addEventListener('keypress',function(){
+  document.getElementById("dataset2").addEventListener('keydown',function(event){
     if(startTime2 == null){
       typeTime = new Date().getTime(); //時刻値 (ミリ秒) を取得して変数に格納（基準値）
       startTime2 = typeTime;
@@ -41,18 +53,33 @@ $(function(){
       array2.push(typeTime - (startTime2 + array2.reduce((a,x) => a+=x,0))); //基準値から経過時間を引く
       console.log(array2);
     }
-  });
-
-  $(document).keydown(function(event){
-    // クリックされたキーコードを取得する
-    var keyCode = event.keyCode;
+    var keyCode = event.keyCode;//keycodeはkeypressだと取得できない
     if(keyCode == 8){
-        console.log("Backspace");
+      console.log("Backspace");
+      $("#dataset2").val("");
+      array2.length = 0;
+      startTime2 = null;
+      var caution = document.getElementById("caution2");
+      caution.innerHTML = "Please enter the tempo well to the end.";
     }
   });
 
+  // $(document).keydown(function(event){
+  //   // クリックされたキーコードを取得する
+  //   var keyCode = event.keyCode;
+  //   if(keyCode == 8){
+  //       console.log("Backspace");
+  //       $("#dataset1").val("");
+  //       array1.length = 0;
+  //       startTime1 = null;
+  //       var caution = document.getElementById("caution");
+  //       caution.innerHTML = "Please enter the tempo well to the end.";
+  //   }
+  // });
+
   //差分計算
   function diffCalc() {
+    arrayDiff.length = 0;
     for (var i = 0; i < array1.length; i++) {
       if (array1[i] > array2[i]) {
         diff = array1[i] - array2[i]
