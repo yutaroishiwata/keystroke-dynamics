@@ -24,15 +24,15 @@
             <h5>First dataset</h5>
             <div class="form-row">
               <div class="col-md-4 mb-3">
-                <label>dataset1</label>
-                <input type="text" name="password" id="dataset1" class="form-control" placeholder="Enter something" autocomplete="off" required>
+                <label>data1</label>
+                <input type="text" name="password" id="firstData" class="form-control" placeholder="Enter something" autocomplete="off" required>
               </div>
               <div class="col-md-4 mb-3">
-                <label>dataset2</label>
+                <label>data2</label>
                 <input type="text" name="password" class="form-control" placeholder="Enter something" autocomplete="off" required>
               </div>
               <div class="col-md-4 mb-3">
-                <label>dataset3</label>
+                <label>data3</label>
                 <input type="text" name="password" class="form-control" placeholder="Enter something" autocomplete="off" required>
               </div>
             </div>
@@ -44,7 +44,7 @@
           <div class="form-group" id="secondDataset">
             <div class="form-group">
               <h5>Second dataset</h5>
-              <input type="text" name="passwordConfirm" id="dataset" class="form-control" placeholder="Enter the same string" required>
+              <input type="text" name="passwordConfirm" id="secondData" class="form-control" placeholder="Enter the same string" required disabled>
               <small id="caution2" class="form-text text-muted"></small>
             </div>
 
@@ -53,7 +53,7 @@
               <input type="range" value="0" min="0" max="100" step="1" class="form-control-range" id="formControlRange">
             </div>
 
-            <button type="button" id="compare" class="btn btn-primary">Comparison</button>
+            <button type="button" id="compare" class="btn btn-primary" disabled>Comparison</button>
           </div>
 
           <label>Diff</label>
@@ -70,8 +70,6 @@
           </div>
         </div>
       </div>
-
-
     </form>
 
     <canvas id="myChart"></canvas>

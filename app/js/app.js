@@ -9,7 +9,7 @@ $(function(){
   var arrayTotal = []; //多次元配列
   var arrayResult = []; //結果計算
   var inputValue = []; //入力値
-  var arrayDiff = [];
+  var arrayDiff = []; //差分
 
 
   $("#firstDataset").on("click",'input', '.form-control', function () {
@@ -53,14 +53,17 @@ $(function(){
   document.getElementById("insert").addEventListener('click',function(){
     array1.length = 0; //配列初期化
     var baseValue = $("#firstDataset input").eq(0).val(); //最初の要素el取得
-    $("#firstDataset input").each(function() {
+    $("#firstDataset input").each(function(i) {
       var value = $(this).val();
       if(0 == value){
-        alert("値がからです");
+        alert("Input content is null");
         return false;
       }else if(baseValue !== value){
-        alert("値が一致していません")
+        alert("Input content is not match");
         return false;
+      }else if(arrayTotal.length > 2 && arrayTotal.length == i + 1){
+        $("#firstDataset input,#addDataset,#insert").prop("disabled", true);
+        $("#secondDataset input,#compare").prop("disabled", false);
       }
     });
     //平均値計算
@@ -74,7 +77,10 @@ $(function(){
     }
   });
 
-  document.getElementById("dataset").addEventListener('keydown',function(event){
+  /*--------------------------------------
+  ---------------------------------------*/
+
+  document.getElementById("secondData").addEventListener('keydown',function(event){
     if(startTime2 == null){
       typeTime = new Date().getTime();
       startTime2 = typeTime;
@@ -93,7 +99,7 @@ $(function(){
     var keyCode = event.keyCode;//keycodeはkeypressだと取得できない
     if(keyCode == 8){
       console.log("Backspace");
-      $("#dataset").val("");
+      $("#secondData").val("");
       array2.length = 0;
       startTime2 = null;
       inputValue.length = 0; //チャート生成用配列初期化
@@ -108,25 +114,31 @@ $(function(){
   //差分計算
   function diffCalc() {
     arrayDiff.length = 0;
-    arrayResult.length = 0;
     var diff;
-    var result;
     for (var i = 0; i < array1.length; i++) {
       if (array1[i] > array2[i]) {
         diff = array1[i] - array2[i];
-        result = 1000 - diff;
         arrayDiff.push(diff);
-        arrayResult.push(result);
       }else {
         diff = array2[i] - array1[i]
-        result = 1000 - diff;
         arrayDiff.push(diff);
-        arrayResult.push(result);
       }
     }
-    //差分出力
     var myp = document.getElementById("diff");
     myp.innerHTML = arrayDiff;
+  }
+
+  //結果値計算
+  function result() {
+    arrayResult.length = 0;
+    var result;
+    for(var i = 0; i < arrayDiff.length; i++){
+      result = 100 - arrayDiff[i];
+      arrayResult.push(result);
+    }
+    var total = arrayResult.reduce((a,x) => a+=x,0) / array2.length;
+    var result = Math.round(total);
+    document.getElementById('result').innerHTML = result + "%";
   }
 
   //グラフの生成
@@ -153,16 +165,11 @@ $(function(){
     });
   }
 
-  function result() {
-    var total = arrayResult.reduce((a,x) => a+=x,0) / array2.length;
-    var result = Math.round(total / 10);
-    document.getElementById('result').innerHTML = result + "%";
-  }
-
+  //値の比較
   document.getElementById("compare").addEventListener('click',function(){
-    if(!(document.getElementById('dataset1').value)){
+    if(!(document.getElementById('firstData').value)){
       alert("Input content is null")
-    }else if ($('#dataset1').val() != $('#dataset').val()) {
+    }else if ($('#firstData').val() != $('#secondData').val()) {
       alert("Input content is not match");
     }else{
       diffCalc();
@@ -177,7 +184,7 @@ $(function(){
     document.getElementById("addDataset").onclick = function(){
       var div_element = document.createElement("div");
       div_element.setAttribute('class', 'col-md-4 mb-3');
-      div_element.innerHTML = '<label>dataset' + i + '</label><input type="text" name="password" id="dataset' + i + '"class="form-control test" placeholder="Enter something" required><small id="caution4" class="form-text text-muted"></small>';
+      div_element.innerHTML = '<label>data' + i + '</label><input type="text" name="password" id="dataset' + i + '"class="form-control test" placeholder="Enter something" required><small id="caution4" class="form-text text-muted"></small>';
       var parent_object = document.getElementById("addDatasetArea");
       parent_object.appendChild(div_element);
       i++;
