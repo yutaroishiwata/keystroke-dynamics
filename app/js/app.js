@@ -52,29 +52,38 @@ $(function(){
   //firstDataset検証(平均値計算)
   document.getElementById("insert").addEventListener('click',function(){
     array1.length = 0; //配列初期化
-    var baseValue = $("#firstDataset input").eq(0).val(); //最初の要素el取得
+    var baseValue = $("#firstDataset input").eq(0).val(); //最初の要素value取得
     $("#firstDataset input").each(function(i) {
       var value = $(this).val();
       if(0 == value){
         alert("Input content is null");
-        return false;
+        exit;
       }else if(baseValue !== value){
         alert("Input content is not match");
-        return false;
-      }else if(arrayTotal.length > 2 && arrayTotal.length == i + 1){
-        $("#firstDataset input,#addDataset,#insert").prop("disabled", true);
-        $("#secondDataset input,#compare").prop("disabled", false);
+        exit;
       }
     });
     //平均値計算
-    for(var len = 0; len < arrayTotal[0].length; len++) {
+    var arrayMaxmin = [];
+    for(var i = 0; i < arrayTotal[0].length; i++) {　//入力文字数だけ回す
     var total = 0;
-      for(var i = 0; i < arrayTotal.length; i++) {
-        total += arrayTotal[i][len];
+    arrayMaxmin.length = 0;
+      for(var arr = 0; arr < arrayTotal.length; arr++) {　//入力回数だけ回す（inputの数）
+        arrayMaxmin.push(arrayTotal[arr][i]);
+        total += arrayTotal[arr][i];　//array[配列番号][インデックス番号]
+      }
+      var minData = Math.min.apply(null, arrayMaxmin);
+      var maxData = Math.max.apply(null, arrayMaxmin);
+      var diff = maxData - minData;
+      if(diff > 300) { //0.3秒以上の差異があった場合
+        alert("The tempo of the input value is disturbed. Please enter again.");
+        $("#firstDataset input").val("");
+        return false;
       }
       array1.push(Math.round(total / arrayTotal.length));
-      console.log(array1);
     }
+    $("#firstDataset input,#addDataset,#insert").prop("disabled", true);
+    $("#secondDataset input,#compare").prop("disabled", false);
   });
 
   /*--------------------------------------
@@ -133,7 +142,7 @@ $(function(){
     arrayResult.length = 0;
     var result;
     for(var i = 0; i < arrayDiff.length; i++){
-      result = 100 - arrayDiff[i];
+      result = 100 - arrayDiff[i]; //基準値100
       arrayResult.push(result);
     }
     var total = arrayResult.reduce((a,x) => a+=x,0) / array2.length;
