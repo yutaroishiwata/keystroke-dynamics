@@ -2,188 +2,240 @@
 $(function(){
 
   var typeTime;
+  var upTime;
   var startTime1; //基準値１
   var startTime2; //基準値２
-  var array1 = []; //タイムデータ１
-  var array2 = []; //タイムデータ２
-  var arrayTotal = []; //多次元配列
-  var arrayResult = []; //結果計算
-  var inputValue = []; //入力値
-  var arrayDiff = []; //差分
-
+  var arrayTotalKey = []; //多次元配列 (入力間隔)
+  var arrayTotalDU = []; //多次元配列 (ダウンからアップ)
+  var arrayAveKey1 = []; //入力間隔１
+  var arrayAveKey2 = []; //入力間隔２
+  var arrayAveDU1 = []; //ダウンからアップ１
+  var arrayAveDU2 = []; //ダウンからアップ２
+  var arrayDiffKey = []; //入力間隔差分
+  var arrayDiffDU = []; //ダウンからアップ差分
+  var arrayKeycode = []; //入力値
 
   $("#firstDataset").on("click",'input', '.form-control', function () {
     var click = $(this).data("click"); //data属性追加　
     if(!click) {　//input一つに対して一回実行
-      var arrayTempo = []; //一時保存
-      arrayTotal.push(arrayTempo);
-      arrayTempo.length = 0;
+      var arrayKey = []; //入力間隔（一時保管）
+      var arrayDownup = []; //ダウンからアップまで（一時保管）
+      arrayTotalKey.push(arrayKey);
+      arrayTotalDU.push(arrayDownup);
+      arrayKey.length = 0;
+      arrayDownup.length = 0;
       startTime1 = null;
-      //打鍵間隔記録
-      $(this).on('keydown',function(event) {
+      //入力間隔計測
+      $(this).on('keydown',function() {
         if(startTime1 == null){
-          typeTime = new Date().getTime(); //.getTime() …… 1970年からの経過ミリ秒数を取得する
-          startTime1 = typeTime; //最初のkeypressミリ秒をstartTime変数に格納
-          arrayTempo.push(0);
-        }else if(arrayTempo.length == 0){
           typeTime = new Date().getTime();
-          arrayTempo.push(typeTime - startTime1); //2回目のkeypressミリ秒からstartTimeを引く
-          console.log(arrayTempo);
+          startTime1 = typeTime; //最初のkeypressミリ秒をstartTime変数に格納
+          arrayKey.push(0);
+        }else if(arrayKey.length == 0){
+          typeTime = new Date().getTime();
+          arrayKey.push(typeTime - startTime1); //2回目のkeypressミリ秒からstartTimeを引く
+          console.log(arrayKey);
         }else {
           typeTime = new Date().getTime();
-          arrayTempo.push(typeTime - (startTime1 + arrayTempo.reduce((a,x) => a+=x,0))); //3回目以降はkeypressミリ秒からstartTime＋keyとkey間ミリ秒を引く
-          console.log(arrayTempo);
+          arrayKey.push(typeTime - (startTime1 + arrayKey.reduce((a,x) => a+=x,0))); //3回目以降はkeypressミリ秒からstartTime＋keyとkey間ミリ秒を引く
+          console.log(arrayKey);
         }
 
-        //Backspace押された場合の処理
-        var keyCode = event.keyCode; //keycodeは keypressだと取得できない
+        var keyCode = event.keyCode; //Backspace押された場合の処理
         if(keyCode == 8){ //8は#Backspace
           $(this).val("");
-          arrayTempo.length = 0;
+          arrayKey.length = 0;
+          arrayDownup.length = 0;
           startTime1 = null;
           //$(this).html("<small class="form-text text-muted">Please enter from the beginning.</small>");
+        }
+      });
+
+      //ダウンからアップ計測
+      $(this).on('keyup',function(event) {
+        upTime = new Date().getTime();
+        var diff = upTime - typeTime;
+        arrayDownup.push(diff);
+
+        var keyCode = event.keyCode;
+        if(keyCode == 8){
+          arrayDownup.length = 0;
         }
       });
       $(this).data("click", true);
     }
   });
 
+  //平均値計算、入力値の差異検証の関数
+  function averageCalc(array, num, arrayResult){
+    var arrayMaxmin = []; //最大値、最小値検証用配列
+    for(var i = 0; i < array[0].length; i++) {　//入力文字数だけ回す
+      var total = 0;
+      arrayMaxmin.length = 0;
+      for(var arr = 0; arr < array.length; arr++) {　//入力回数だけ回す（inputの数）
+        arrayMaxmin.push(array[arr][i]);
+        total += array[arr][i];　//array[配列番号][インデックス番号]
+      }
+      var minData = Math.min.apply(null, arrayMaxmin); //最小値精査
+      var maxData = Math.max.apply(null, arrayMaxmin); //最大値精査
+      var diff = maxData - minData;
+      if(diff > num){
+        alert("The tempo of the input value is disturbed. Please enter again.");
+        throw new Error('end');
+      }
+      arrayResult.push(Math.round(total / array.length));
+    }
+  }
 
   //firstDataset検証(平均値計算)
   document.getElementById("insert").addEventListener('click',function(){
-    array1.length = 0; //配列初期化
-    var baseValue = $("#firstDataset input").eq(0).val(); //最初の要素value取得
-    $("#firstDataset input").each(function(i) {
-      var value = $(this).val();
-      if(0 == value){
-        alert("Input content is null");
-        exit;
-      }else if(baseValue !== value){
-        alert("Input content is not match");
-        exit;
-      }
-    });
-    //平均値計算
-    var arrayMaxmin = [];
-    for(var i = 0; i < arrayTotal[0].length; i++) {　//入力文字数だけ回す
-    var total = 0;
-    arrayMaxmin.length = 0;
-      for(var arr = 0; arr < arrayTotal.length; arr++) {　//入力回数だけ回す（inputの数）
-        arrayMaxmin.push(arrayTotal[arr][i]);
-        total += arrayTotal[arr][i];　//array[配列番号][インデックス番号]
-      }
-      var minData = Math.min.apply(null, arrayMaxmin);
-      var maxData = Math.max.apply(null, arrayMaxmin);
-      var diff = maxData - minData;
-      if(diff > 300) { //0.3秒以上の差異があった場合
-        alert("The tempo of the input value is disturbed. Please enter again.");
-        $("#firstDataset input").val("");
-        return false;
-      }
-      array1.push(Math.round(total / arrayTotal.length));
+    try {
+      arrayAveKey1.length = 0; //配列初期化
+      var baseValue = $("#firstDataset input").eq(0).val(); //最初の要素value取得
+      $("#firstDataset input").each(function(i) {
+        var value = $(this).val();
+        if(0 == value){
+          alert("Input content is null");
+          throw new Error('end');
+        }else if(baseValue !== value){
+          alert("Input content is not match");
+          throw new Error('end');
+        }
+      });
+      //平均値計算
+      averageCalc(arrayTotalKey, 200, arrayAveKey1); //入力間隔に0.2秒以上の差異許容
+      averageCalc(arrayTotalDU, 200, arrayAveDU1); //キーダウンからアップまでに0.2秒以上の差異許容
+
+      $("#firstDataset input,#addDataset,#insert").prop("disabled", true);
+      $("#secondDataset input,#compare").prop("disabled", false);
+    } catch(e) {
+      console.log(e.message);
     }
-    $("#firstDataset input,#addDataset,#insert").prop("disabled", true);
-    $("#secondDataset input,#compare").prop("disabled", false);
+
   });
 
-  /*--------------------------------------
-  ---------------------------------------*/
-
-  document.getElementById("secondData").addEventListener('keydown',function(event){
+  /*---------------------------------------------------------------------------------
+  -----------------------------------------------------------------------------------*/
+　
+  var secondData = document.getElementById("secondData");
+  //入力間隔計測
+  secondData.addEventListener('keydown',function(event){
     if(startTime2 == null){
       typeTime = new Date().getTime();
       startTime2 = typeTime;
-    }else if(array2.length == 0){
+    }else if(arrayAveKey2.length == 0){
       typeTime = new Date().getTime();
-      array2.push(0);
-      array2.push(typeTime - startTime2);
-      console.log(array2);
+      arrayAveKey2.push(0);
+      arrayAveKey2.push(typeTime - startTime2);
+      console.log(arrayAveKey2);
     }else {
       typeTime = new Date().getTime();
-      array2.push(typeTime - (startTime2 + array2.reduce((a,x) => a+=x,0)));
-      console.log(array2);
+      arrayAveKey2.push(typeTime - (startTime2 + arrayAveKey2.reduce((a,x) => a+=x,0)));
+      console.log(arrayAveKey2);
     }
 
-    //Backspace押された場合の処理
-    var keyCode = event.keyCode;//keycodeはkeypressだと取得できない
+    var keyCode = event.keyCode; //Backspace押された場合の処理
     if(keyCode == 8){
       console.log("Backspace");
       $("#secondData").val("");
-      array2.length = 0;
+      arrayAveKey2.length = 0;
       startTime2 = null;
-      inputValue.length = 0; //チャート生成用配列初期化
+      arrayKeycode.length = 0; //チャート生成用配列初期化
       var caution = document.getElementById("caution2");
       caution.innerHTML = "Please enter the tempo well to the end.";
     }else {
-      inputValue.push(event.keyCode); //チャート生成用キーコード格納
+      arrayKeycode.push(event.keyCode); //チャート生成用キーコード格納
     }
   });
 
+  //ダウンからアップ計測
+  secondData.addEventListener('keyup',function(event){
+    upTime = new Date().getTime();
+    var diff = upTime - typeTime;
+    arrayAveDU2.push(diff);
 
-  //差分計算
-  function diffCalc() {
+    var keyCode = event.keyCode;
+    if(keyCode == 8){
+      arrayAveDU2.length = 0;
+    }
+  });
+
+  //差分計算関数
+  function diffCalc(arrayDiff, arrayData1, arrayData2) {
     arrayDiff.length = 0;
     var diff;
-    for (var i = 0; i < array1.length; i++) {
-      if (array1[i] > array2[i]) {
-        diff = array1[i] - array2[i];
+    for (var i = 0; i < arrayData1.length; i++) {
+      if (arrayData1[i] > arrayData2[i]) {
+        diff = arrayData1[i] - arrayData2[i];
         arrayDiff.push(diff);
       }else {
-        diff = array2[i] - array1[i]
+        diff = arrayData2[i] - arrayData1[i]
         arrayDiff.push(diff);
       }
     }
-    var myp = document.getElementById("diff");
-    myp.innerHTML = arrayDiff;
   }
 
-  //結果値計算
-  function result() {
-    arrayResult.length = 0;
-    var result;
-    for(var i = 0; i < arrayDiff.length; i++){
-      result = 100 - arrayDiff[i]; //基準値100
-      arrayResult.push(result);
+  //結果計算関数
+  function resultCalc(arrayDiff) {
+    var total = 0;
+    for(var i = 0; i < arrayDiff.length; i++) {
+      total += 100 - arrayDiff[i];  //基準値100
     }
-    var total = arrayResult.reduce((a,x) => a+=x,0) / array2.length;
-    var result = Math.round(total);
-    document.getElementById('result').innerHTML = result + "%";
+    return Math.round(total / arrayAveKey2.length);
   }
 
-  //グラフの生成
+  //グラフの生成関数
   function chart() {
     var ctx = document.getElementById('myChart').getContext('2d');
     var myChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: inputValue,
+        labels: arrayKeycode,
         datasets: [{
-          label: 'First dataset',
-          data: array1,
-          backgroundColor: "rgba(204,204,204,0.4)"
-        }, {
-          label: 'Second dataset',
-          data: array2,
+          label: 'First dataset Key',
+          data: arrayAveKey1,
           backgroundColor: "rgba(0,123,256,0.4)"
         }, {
-          label: 'Diff',
-          data: arrayDiff,
-          backgroundColor: "rgba(255,255,255,0.4)"
-        }]
+          label: 'Second data Key',
+          data: arrayAveKey2,
+          backgroundColor: "rgba(0,123,256,0.4)"
+        }, {
+          label: 'First dataset Down Up',
+          data: arrayAveDU1,
+          backgroundColor: "rgba(145,219,185,0.4)"
+        }, {
+          label: 'Second data Down Up',
+          data: arrayAveDU2,
+          backgroundColor: "rgba(145,219,185,0.4)"
+        }
+        // }, {
+        //   label: 'Key Diff',
+        //   data: arrayDiffKey,
+        //   backgroundColor: "rgba(204,204,204,0.4)"
+        // }, {
+        //   label: 'Down Up Diff',
+        //   data: arrayDiffDU,
+        //   backgroundColor: "rgba(204,204,204,0.4)"
+        // }
+        ]
       }
     });
   }
 
-  //値の比較
+  //最終処理
   document.getElementById("compare").addEventListener('click',function(){
     if(!(document.getElementById('firstData').value)){
       alert("Input content is null")
     }else if ($('#firstData').val() != $('#secondData').val()) {
       alert("Input content is not match");
     }else{
-      diffCalc();
+      diffCalc(arrayDiffKey, arrayAveKey1, arrayAveKey2);
+      diffCalc(arrayDiffDU, arrayAveDU1, arrayAveDU2);
+      var resultKey = resultCalc(arrayDiffKey);
+      var resultDU = resultCalc(arrayDiffDU);
+      var result = (resultKey + resultDU) / 2;
+      document.getElementById('result').innerHTML = result + "%";
       chart();
-      result();
     }
   });
 
