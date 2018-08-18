@@ -144,7 +144,7 @@ $(function(){
       var caution = document.getElementById("caution2");
       caution.innerHTML = "Please enter the tempo well to the end.";
     }else {
-      arrayKeycode.push(event.keyCode); //チャート生成用キーコード格納
+      arrayKeycode.push(String.fromCharCode(event.keyCode)); //チャート生成用キーコード格納
     }
   });
 
