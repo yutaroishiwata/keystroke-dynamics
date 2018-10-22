@@ -1,6 +1,5 @@
-
+'use strict';
 $(function(){
-
   var typeTime;
   var upTime;
   var startTime1; //基準値１
