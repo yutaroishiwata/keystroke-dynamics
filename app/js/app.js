@@ -1,6 +1,6 @@
+"use strict";
 
 $(function(){
-
   var typeTime;
   var upTime;
   var startTime1; //基準値１
@@ -15,7 +15,7 @@ $(function(){
   var arrayDiffDU = []; //ダウンからアップ差分
   var arrayKeycode = []; //入力値
 
-  $("#firstDataset").on("click",'input', '.form-control', function () {
+  $("#firstDataset input").focus(function () {
     var click = $(this).data("click"); //data属性追加　
     if(!click) {　//input一つに対して一回実行
       var arrayKey = []; //入力間隔（一時保管）
@@ -26,42 +26,43 @@ $(function(){
       arrayDownup.length = 0;
       startTime1 = null;
       //入力間隔計測
-      $(this).on('keydown',function() {
-        if(startTime1 == null){
-          typeTime = new Date().getTime();
-          startTime1 = typeTime; //最初のkeypressミリ秒をstartTime変数に格納
-          arrayKey.push(0);
-        }else if(arrayKey.length == 0){
-          typeTime = new Date().getTime();
-          arrayKey.push(typeTime - startTime1); //2回目のkeypressミリ秒からstartTimeを引く
-          console.log(arrayKey);
-        }else {
-          typeTime = new Date().getTime();
-          arrayKey.push(typeTime - (startTime1 + arrayKey.reduce((a,x) => a+=x,0))); //3回目以降はkeypressミリ秒からstartTime＋keyとkey間ミリ秒を引く
-          console.log(arrayKey);
-        }
-
-        var keyCode = event.keyCode; //Backspace押された場合の処理
-        if(keyCode == 8){ //8は#Backspace
+      $(this).on('keydown',function(event) {
+        if(event.keyCode == 8) {
           $(this).val("");
           arrayKey.length = 0;
           arrayDownup.length = 0;
           startTime1 = null;
           //$(this).html("<small class="form-text text-muted">Please enter from the beginning.</small>");
+        }else if(event.keyCode == 9){
+          //tabキーが押された場合の処理
+        }else if(startTime1 == null){
+          typeTime = new Date().getTime();
+          startTime1 = typeTime; //最初のkeypressミリ秒をstartTime1変数に格納
+          arrayKey.push(0);
+        }else if(arrayKey.length == 0){
+          typeTime = new Date().getTime();
+          arrayKey.push(typeTime - startTime1); //2回目のkeypressミリ秒からstartTime1を引く
+          console.log(arrayKey);
+        }else {
+          typeTime = new Date().getTime();
+          arrayKey.push(typeTime - (startTime1 + arrayKey.reduce((a,x) => a+=x,0))); //3回目以降はkeypressミリ秒からstartTime1＋keyとkey間ミリ秒を引く
+          console.log(arrayKey);
         }
       });
-
       //ダウンからアップ計測
       $(this).on('keyup',function(event) {
-        upTime = new Date().getTime();
-        var diff = upTime - typeTime;
-        arrayDownup.push(diff);
-
-        var keyCode = event.keyCode;
-        if(keyCode == 8){
+        if(event.keyCode == 8){
           arrayDownup.length = 0;
+        }else if(event.keyCode == 9){
+          //tabキーが押された場合の処理
+        }else {
+          upTime = new Date().getTime();
+          var diff = upTime - typeTime;
+          arrayDownup.push(diff);
+          console.log(arrayDownup);
         }
-      });
+    });
+
       $(this).data("click", true);
     }
   });
@@ -86,7 +87,6 @@ $(function(){
       arrayResult.push(Math.round(total / array.length));
     }
   }
-
   //firstDataset検証(平均値計算)
   document.getElementById("insert").addEventListener('click',function(){
     try {
@@ -120,7 +120,16 @@ $(function(){
   var secondData = document.getElementById("secondData");
   //入力間隔計測
   secondData.addEventListener('keydown',function(event){
-    if(startTime2 == null){
+    if(event.keyCode == 8){
+      $("#secondData").val("");
+      arrayAveKey2.length = 0;
+      startTime2 = null;
+      arrayKeycode.length = 0; //チャート生成用配列初期化
+      //var caution = document.getElementById("caution2");
+      //caution.innerHTML = "Please enter the tempo well to the end.";
+    }else if(event.keyCode == 9){
+      //tabキーが押された場合の処理
+    }else if(startTime2 == null){
       typeTime = new Date().getTime();
       startTime2 = typeTime;
     }else if(arrayAveKey2.length == 0){
@@ -133,30 +142,19 @@ $(function(){
       arrayAveKey2.push(typeTime - (startTime2 + arrayAveKey2.reduce((a,x) => a+=x,0)));
       console.log(arrayAveKey2);
     }
-
-    var keyCode = event.keyCode; //Backspace押された場合の処理
-    if(keyCode == 8){
-      console.log("Backspace");
-      $("#secondData").val("");
-      arrayAveKey2.length = 0;
-      startTime2 = null;
-      arrayKeycode.length = 0; //チャート生成用配列初期化
-      var caution = document.getElementById("caution2");
-      caution.innerHTML = "Please enter the tempo well to the end.";
-    }else {
-      arrayKeycode.push(String.fromCharCode(event.keyCode)); //チャート生成用キーコード格納
-    }
   });
 
   //ダウンからアップ計測
   secondData.addEventListener('keyup',function(event){
-    upTime = new Date().getTime();
-    var diff = upTime - typeTime;
-    arrayAveDU2.push(diff);
-
-    var keyCode = event.keyCode;
-    if(keyCode == 8){
+    if(event.keyCode == 8){
       arrayAveDU2.length = 0;
+    }else if(event.keyCode == 9){
+      //tabキーが押された場合の処理
+    }else{
+      upTime = new Date().getTime();
+      var diff = upTime - typeTime;
+      arrayAveDU2.push(diff);
+      arrayKeycode.push(String.fromCharCode(event.keyCode)); //チャート生成用キーコード格納
     }
   });
 
