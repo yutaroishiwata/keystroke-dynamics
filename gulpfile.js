@@ -1,23 +1,25 @@
 var gulp = require('gulp');
 var pug = require('gulp-pug');
+var babel = require('gulp-babel');
 var notify = require("gulp-notify");
 var plumber = require("gulp-plumber");
 var browserSync = require('browser-sync');
 
-//path
+// path
 var paths = {
-  'pug': 'app/pug/*.pug',
-  'pugNotRead': 'app/pug/**/(_)*.pug',
+  'pug': './src/pug/*.pug',
+  'pugNotRead': './src/pug/**/(_)*.pug',
   'html': './app',
-  'js': 'app/js/*.js'
+  'jsSrc': './src/js/*.js',
+  'jsApp': './app/js',
 }
 
-//setting : Pug Options
+// setting : Pug Options
 var pugOptions = {
   pretty: true
 }
 
-//Pug
+// Pug
 gulp.task('pug', () => {
   return gulp.src([paths.pug, '!' + paths.pugNotRead])
     .pipe(plumber({ errorHandler: notify.onError("Error: <%= error.message %>") }))
@@ -25,7 +27,14 @@ gulp.task('pug', () => {
     .pipe(gulp.dest(paths.html));
 });
 
-//Browser Sync
+// Babel
+gulp.task('babel', () => {
+  gulp.src(paths.jsSrc)
+    .pipe(babel())
+    .pipe(gulp.dest(paths.jsApp));
+});
+
+// Browser Sync
 gulp.task('browser-sync', () => {
   browserSync({
     server: {
@@ -39,9 +48,11 @@ gulp.task('reload', () => {
   browserSync.reload();
 });
 
-//watch
-gulp.task('watch', function () {
+// watch
+gulp.task('watch', () => {
   gulp.watch([paths.pug, '!' + paths.pugNotRead], ['pug']);
+  gulp.watch([paths.jsSrc], ['babel']);
 });
 
+// command
 gulp.task('default', ['browser-sync','watch']);
