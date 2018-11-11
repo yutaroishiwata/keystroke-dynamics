@@ -1,6 +1,7 @@
 var gulp = require('gulp');
 var pug = require('gulp-pug');
 var babel = require('gulp-babel');
+var eslint = require('gulp-eslint');
 var notify = require("gulp-notify");
 var plumber = require("gulp-plumber");
 var browserSync = require('browser-sync');
@@ -14,24 +15,32 @@ var paths = {
   'jsApp': './app/js',
 }
 
-// setting : Pug Options
-var pugOptions = {
-  pretty: true
-}
-
 // Pug
 gulp.task('pug', () => {
   return gulp.src([paths.pug, '!' + paths.pugNotRead])
     .pipe(plumber({ errorHandler: notify.onError("Error: <%= error.message %>") }))
-    .pipe(pug(pugOptions))
+    .pipe(pug({
+      pretty: true
+    }))
     .pipe(gulp.dest(paths.html));
 });
 
 // Babel
-gulp.task('babel', () => {
+gulp.task('babel', () =>
   gulp.src(paths.jsSrc)
-    .pipe(babel())
-    .pipe(gulp.dest(paths.jsApp));
+    .pipe(plumber({ errorHandler: notify.onError("Error: <%= error.message %>") }))
+    .pipe(babel({
+      presets: ['@babel/env']
+    }))
+    .pipe(gulp.dest(paths.jsApp))
+);
+
+// eslint
+gulp.task('lint', () => {
+  return gulp.src(['**/*.js','!node_modules/**'])
+    .pipe(eslint({ useEslintrc: true }))
+    .pipe(eslint.format())
+    .pipe(eslint.failAfterError());
 });
 
 // Browser Sync
@@ -41,8 +50,8 @@ gulp.task('browser-sync', () => {
       baseDir: paths.html
     }
   });
-  gulp.watch(paths.js, ['reload']);
-  gulp.watch(paths.html, ['reload']);
+  gulp.watch(paths.pug, ['reload']);
+  gulp.watch(paths.jsSrc, ['reload']);
 });
 gulp.task('reload', () => {
   browserSync.reload();
@@ -56,3 +65,4 @@ gulp.task('watch', () => {
 
 // command
 gulp.task('default', ['browser-sync','watch']);
+
