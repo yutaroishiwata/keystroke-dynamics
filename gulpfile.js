@@ -10,9 +10,9 @@ var browserSync = require('browser-sync');
 var paths = {
   'pug': './src/pug/*.pug',
   'pugNotRead': './src/pug/**/(_)*.pug',
-  'html': './app',
+  'html': './docs',
   'jsSrc': './src/js/*.js',
-  'jsApp': './app/js',
+  'jsDocs': './docs/js',
 }
 
 // Pug
@@ -32,7 +32,7 @@ gulp.task('babel', () =>
     .pipe(babel({
       presets: ['@babel/env']
     }))
-    .pipe(gulp.dest(paths.jsApp))
+    .pipe(gulp.dest(paths.jsDocs))
 );
 
 // eslint
