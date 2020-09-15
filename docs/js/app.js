@@ -134,7 +134,7 @@ $(function () {
 
       averageCalc(arrayTotalDU, 200, arrayAveDU1); //キーダウンからアップまでに0.2秒以上の差異許容
 
-      $("#firstDataset input,#addDataset,#insert").prop("disabled", true);
+      $("#firstDataset input,addDataset,#insert").prop("disabled", true);
       $("#secondDataset input,#compare").prop("disabled", false);
     } catch (e) {
       console.log(e.message);
@@ -263,10 +263,10 @@ $(function () {
     }
   }); //データセット追加処理
 
+  /*
   {
     var i = 4;
-
-    document.getElementById("addDataset").onclick = function () {
+     document.getElementById("addDataset").onclick = function () {
       var div_element = document.createElement("div");
       div_element.setAttribute('class', 'col-md-4 mb-3');
       div_element.innerHTML = '<label>data' + i + '</label><input type="text" name="password" id="dataset' + i + '"class="form-control test" placeholder="Enter something" required><small id="caution4" class="form-text text-muted"></small>';
@@ -275,4 +275,5 @@ $(function () {
       i++;
     };
   }
+  */
 });
